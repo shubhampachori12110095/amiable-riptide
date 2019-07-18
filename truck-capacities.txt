@@ -1,14 +1,30 @@
+##### OVERVIEW #####
 # Bike Share Toronto 
 - 5000 bikes
 - 1.9 million
 - 468 station (most recent number)
 
+##### BIKE INFO #####
 # Bikes used (robust similar to Parisian velib, w = 20 kg)
 
 - L 1.8m
 - h 1.0 m
 - w 0.2 m (pedals and handlebar)
 
+
+##### CO2 & FUEL INFO #####
+#CO2 consumption based on fuel consumption
+p0 (empty-load fuel consumption rate) = 0.296
+p` (full-load fuel consumption rate) = 0.39
+Q0 (Maximum bike capacity) = Depends on truck chosen
+q (Number of bikes in truck) = Decision variable
+d (distance) = Based on data
+CER (CO2 emission rate): 2.61 kg/liter
+
+#CO2 EQUATION: Emission = CER * (p0 + (p`-p0)/Q0)*d
+
+
+##### TRUCK INFO #####
 # Sedan Capacity (Honda Civic)
 
 - Total: 5
