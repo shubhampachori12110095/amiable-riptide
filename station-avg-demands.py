@@ -98,6 +98,3 @@ pd.to_pickle(averageDelta, "data/averageDelta.pkl")
 
 print(outgoingDf)
 print(incomingDf)
-
-
-
