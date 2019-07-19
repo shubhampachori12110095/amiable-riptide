@@ -23,5 +23,6 @@ for x in range(0,sd_rows):
 
 #Putting distances into dataframe
 sdf = pd.DataFrame.from_dict(sd_distances)
-#sdf.to_csv('station-distances.csv', index =True, header=True) #Optional if you want the distances in CSV form
+print(sdf)
+sdf.to_csv('station-distances.csv', index =True, header=True) #Optional if you want the distances in CSV form
 

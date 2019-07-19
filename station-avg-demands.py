@@ -30,3 +30,4 @@ print(unique_stations)
 # Count the number of departures from each station on the hardcoded Q3 2017 date.
 counter = newDf['from_station_name'].value_counts()
 print(counter)
+print(len(counter))
