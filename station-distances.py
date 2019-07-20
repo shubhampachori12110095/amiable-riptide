@@ -35,7 +35,7 @@ for x in range(0,sd_rows):
     sd_distances[key] = distances
     # print(len(distances))
 
-#Putting distances into dataframe
+# Putting distances into dataframe
 # print(sd_distances)
 
 sdf = pd.DataFrame(sd_distances, index=sd['station_name'].tolist())
