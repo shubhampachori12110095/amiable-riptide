@@ -6,21 +6,42 @@ import random
 
 def create_model():
 
-    # Import all data needed. (TODO)
-    # distances = pd.read_pickle('data/distances.pkl').astype(int)
-    # averageDelta = pd.read_pickle('data/averageDelta.pkl')
-    # distanceList = distances.values.tolist()
-    # print(distances.shape)
-    # print(distanceList)
-    # print(averageDelta)
+    # Import all data needed. 
+    distances = pd.read_pickle('data/distances.pkl').astype(int)
+    averageDelta = pd.read_pickle('data/averageDelta.pkl')
+    ## Add the DC to the average deltas.
+    listOfDemands = averageDelta[0].tolist()
+    listOfDemands.insert(0, 0)
+
+    # Make all the demands into integers
+    listOfDemands = [round(x) for x in listOfDemands]
+    # Change all negative values in list of demands to zero.
+    listOfDemands = [0 if i < 0 else i for i in listOfDemands]
+
+    # Find all the zero demands (because we won't want to visit these nodes), and drop them from the demand list.
+    # Save the indices of these dropped nodes and drop them from the distance matrix also.
+
+    demandIndicesToDrop = [i for i in range(1, len(listOfDemands)) if listOfDemands[i] == 0]
+    print(demandIndicesToDrop)
     
+    distances.drop(distances.index[demandIndicesToDrop], inplace=True)
+    distances.drop(distances.columns[demandIndicesToDrop], axis=1, inplace=True)
+    
+    # Remove zero values from demand list.
+    j = 0 
+    length = len(listOfDemands)
+    while(j < length):
+        if(listOfDemands[j] == 0 and j != 0):
+            listOfDemands.remove(listOfDemands[j])
+            length = length - 1
+            continue
+        j = j+1
+
+    listOfDemands.sort(key=lambda v: v != 0)
+    # Create the array of arrays for the distances.
+    distanceList = distances.values.tolist()
+
     data = {}
-    # Grab the distance and demand data
-    importData = pd.read_csv('station-distances.csv', index_col=None)
-    importData = importData.astype(int)
-    print(importData)
-    importDataAux = importData.drop(importData.columns[0], axis=1)
-    cleanData = importDataAux.values.tolist()
 
     # TODO
     #1 Import distance matrix and make it in list of lists (A, B, C, D, ..., DC) 2D m * n 
@@ -35,24 +56,19 @@ def create_model():
     # Hardcode the vehicle capacity for the moment.
     vehicleCapacity = 25
     # Find the total demand that will have to be distributed.
-    totalDemand = sum(randomDemands)
+    totalDemand = sum(listOfDemands) # sum(randomDemands)
     # Create the vehicle capacities array...
         # But first, excuse the funky way of doing ceiling divisions in Python.
     numberOfVehicles = ((totalDemand - 1) // vehicleCapacity) + 1
-    vehicleCapacityList = [vehicleCapacity] * numberOfVehicles
+    vehicleCapacityList = [vehicleCapacity] * (numberOfVehicles + 1)
 
     # The distance_matrix is a list of lists.
-    data['distance_matrix'] = cleanData
-    data['demands'] = randomDemands
-    # print(cleanData)
-    # print(len(cleanData))
-    # print(len(randomDemands))
-    # print(vehicleCapacity)
-    # print(len(vehicleCapacityList))
-    data['vehicle_capacities'] = vehicleCapacityList * 2
-    data['num_vehicles'] = numberOfVehicles * 2 
+    data['distance_matrix'] = distanceList #cleanData
+    data['demands'] = listOfDemands #randomDemands
+    data['vehicle_capacities'] = vehicleCapacityList # vehicleCapacityList * 2
+    data['num_vehicles'] = numberOfVehicles + 1 # numberOfVehicles * 2 
     data['depot'] = 0
-    print(randomDemands)
+    # print(randomDemands)
     return data
 
 def print_solution(data, manager, routing, assignment):

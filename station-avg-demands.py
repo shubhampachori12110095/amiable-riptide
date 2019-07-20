@@ -72,6 +72,7 @@ allIncomingTrips.append(incomingTripsPerDay)
 allDeltas.append(deltaPerDay)
 
 # Create data frames
+stationNames = sd['station_name'].tolist()
 outgoingDf = pd.DataFrame(data=allOutgoingTrips, columns=stationNames, index=dates)
 incomingDf = pd.DataFrame(data=allIncomingTrips, columns=stationNames, index=dates)
 deltaDf = pd.DataFrame(data=allDeltas, columns=stationNames, index=dates)
