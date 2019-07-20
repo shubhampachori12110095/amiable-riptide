@@ -4,10 +4,15 @@ from ortools.constraint_solver import pywrapcp
 import pandas as pd
 import random
 
-# importData = pd.read_csv('station-distances.csv')
-# print (importData)
-
 def create_model():
+
+    # Import all data needed. (TODO)
+    # distances = pd.read_pickle('data/distances.pkl').astype(int)
+    # averageDelta = pd.read_pickle('data/averageDelta.pkl')
+    # distanceList = distances.values.tolist()
+    # print(distances.shape)
+    # print(distanceList)
+    # print(averageDelta)
     
     data = {}
     # Grab the distance and demand data
@@ -16,16 +21,19 @@ def create_model():
     print(importData)
     importDataAux = importData.drop(importData.columns[0], axis=1)
     cleanData = importDataAux.values.tolist()
-    # print (cleanData)
 
-    # Create random demands for the moments.
+    # TODO
+    #1 Import distance matrix and make it in list of lists (A, B, C, D, ..., DC) 2D m * n 
+    #2 Have an input vector of the demands at each point (A, B, C, D, ..., DC) 1D
+    #3 Tweak the constraint for pickups
+    
     randomDemands = []
     numberOfStations = 81
     for i in range(numberOfStations):
-        randomDemands.append(random.randint(3, 15))
+        randomDemands.append(random.randint(3, 10))
 
     # Hardcode the vehicle capacity for the moment.
-    vehicleCapacity = 15
+    vehicleCapacity = 25
     # Find the total demand that will have to be distributed.
     totalDemand = sum(randomDemands)
     # Create the vehicle capacities array...
@@ -36,13 +44,13 @@ def create_model():
     # The distance_matrix is a list of lists.
     data['distance_matrix'] = cleanData
     data['demands'] = randomDemands
-    print(cleanData)
-    print(len(cleanData))
-    print(len(randomDemands))
-    print(vehicleCapacity)
-    print(len(vehicleCapacityList))
-    data['vehicle_capacities'] = vehicleCapacityList
-    data['num_vehicles'] = numberOfVehicles
+    # print(cleanData)
+    # print(len(cleanData))
+    # print(len(randomDemands))
+    # print(vehicleCapacity)
+    # print(len(vehicleCapacityList))
+    data['vehicle_capacities'] = vehicleCapacityList * 2
+    data['num_vehicles'] = numberOfVehicles * 2 
     data['depot'] = 0
     print(randomDemands)
     return data
@@ -105,6 +113,7 @@ def main():
 
 
     # Add Capacity constraint.
+    # TODO This mf is the one blocking to tweak for pickup routing
     def demand_callback(from_index):
         """Returns the demand of the node."""
         # Convert from routing variable Index to demands NodeIndex.
