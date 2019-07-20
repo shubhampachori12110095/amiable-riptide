@@ -8,7 +8,9 @@ sd_rows = sd.shape[0]
 sd_distances = {}
 
 # add distribution center to distances (located at union station)
-sd.loc[sd_rows] = ['DC', 43.645609, -79.380386, 0, 0]
+sd.loc[-1] = ['DC', 43.645609, -79.380386, 0, 0]
+sd.index = sd.index + 1
+sd.sort_index(inplace=True)
 sd_rows = sd.shape[0]
 
 def manhattanDistance(coords_1, coords_2):
