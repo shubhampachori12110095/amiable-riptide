@@ -113,6 +113,7 @@ def main():
 
 
     # Add Capacity constraint.
+    # TODO This mf is the one blocking to tweak for pickup routing
     def demand_callback(from_index):
         """Returns the demand of the node."""
         # Convert from routing variable Index to demands NodeIndex.
