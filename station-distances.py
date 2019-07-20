@@ -4,9 +4,12 @@ import pandas as pd
 from geopy.distance import geodesic
 
 sd = pd.read_pickle("data/station-data.pkl")
-sd1 = pd.read_pickle("data/station-data.pkl")
 sd_rows = sd.shape[0]
 sd_distances = {}
+
+# add distribution center to distances (located at union station)
+sd.loc[sd_rows] = ['DC', 43.645609, -79.380386, 0, 0]
+sd_rows = sd.shape[0]
 
 def manhattanDistance(coords_1, coords_2):
     x1, y1 = coords_1
@@ -33,7 +36,6 @@ for x in range(0,sd_rows):
     #Appending to dictionary
     key = sd.loc[x,'station_name']
     sd_distances[key] = distances
-    # print(len(distances))
 
 # Putting distances into dataframe
 # print(sd_distances)
