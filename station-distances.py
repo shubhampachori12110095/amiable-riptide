@@ -1,10 +1,10 @@
 #THIS SCRIPT CREATES A DATAFRAME TO GET GEO DISTANCES BETWEEN EACH TERMINAL
 
 import pandas as pd
-import numpy as np
 from geopy.distance import geodesic
 
-sd = pd.read_csv("data/station-data.csv")
+sd = pd.read_pickle("data/station-data.pkl")
+sd1 = pd.read_pickle("data/station-data.pkl")
 sd_rows = sd.shape[0]
 sd_distances = {}
 
@@ -20,21 +20,25 @@ def manhattanDistance(coords_1, coords_2):
     return xdistance + ydistance
 
 
-#Parsing through dataframe and getting distances between each Terminal
+# Parsing through dataframe and getting distances between each Terminal
 for x in range(0,sd_rows):
+    distances = []
+    coords_1 = (sd.loc[x, 'latitude'], sd.loc[x, 'longitude'])
     for y in range(0,sd_rows):
         #Getting real world distance given latitudes
-        coords_1 = (sd.loc[x,'Latitude'], sd.loc[x,'Longitude'])
-        coords_2 = (sd.loc[y,'Latitude'], sd.loc[y,'Longitude'])
+        coords_2 = (sd.loc[y,'latitude'], sd.loc[y,'longitude'])
 
-        distance = manhattanDistance(coords_1, coords_2)
+        distances.append(manhattanDistance(coords_1, coords_2))
 
-        #Appending to dictionary
-        key = sd.loc[x,'Terminal']
-        sd_distances.setdefault(key, []).append(distance)
+    #Appending to dictionary
+    key = sd.loc[x,'station_name']
+    sd_distances[key] = distances
+    # print(len(distances))
 
 #Putting distances into dataframe
-sdf = pd.DataFrame.from_dict(sd_distances)
-print(sdf)
-#sdf.to_csv('station-distances.csv', index =True, header=True) #Optional if you want the distances in CSV form
+# print(sd_distances)
 
+sdf = pd.DataFrame(sd_distances, index=sd['station_name'].tolist())
+
+print(sdf)
+pd.to_pickle(sdf, "data/distances.pkl")
