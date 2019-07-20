@@ -40,7 +40,7 @@ for x in range(0,sd_rows):
 # Putting distances into dataframe
 # print(sd_distances)
 
-sdf = pd.DataFrame(sd_distances, index=sd['station_name'].tolist())
+sdf = pd.DataFrame(sd_distances, columns=sd['station_name'].tolist(), index=sd['station_name'].tolist())
 
 print(sdf)
 pd.to_pickle(sdf, "data/distances.pkl")
