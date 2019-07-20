@@ -22,7 +22,7 @@ def create_model():
     # Save the indices of these dropped nodes and drop them from the distance matrix also.
 
     demandIndicesToDrop = [i for i in range(1, len(listOfDemands)) if listOfDemands[i] == 0]
-    print(demandIndicesToDrop)
+    # print(demandIndicesToDrop)
     
     distances.drop(distances.index[demandIndicesToDrop], inplace=True)
     distances.drop(distances.columns[demandIndicesToDrop], axis=1, inplace=True)
@@ -112,8 +112,6 @@ def main():
     # Create Routing Model.
     routing = pywrapcp.RoutingModel(manager)
 
-    print('#1 ****')
-
     # Create and register a transit callback.
     def distance_callback(from_index, to_index):
         """Returns the distance between the two nodes."""
@@ -145,7 +143,6 @@ def main():
         True,  # start cumul to zero
         'Capacity')
 
-    print('#2 ****')
     # Setting first solution heuristic.
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     search_parameters.first_solution_strategy = (
