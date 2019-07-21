@@ -3,11 +3,13 @@ from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 import pandas as pd
 import random
+import pickle
 
 def create_model():
 
     # Import all data needed. 
     distances = pd.read_pickle('data/distances.pkl').astype(int)
+    stationData = pd.read_pickle('data/station-data.pkl')
     averageDelta = pd.read_pickle('data/averageDelta.pkl')
     ## Add the DC to the average deltas.
     listOfDemands = averageDelta[0].tolist()
@@ -26,6 +28,19 @@ def create_model():
     
     distances.drop(distances.index[demandIndicesToDrop], inplace=True)
     distances.drop(distances.columns[demandIndicesToDrop], axis=1, inplace=True)
+
+    # station data cleaned of stations with 0 demand
+    stationData.drop(stationData.index[demandIndicesToDrop], inplace=True)
+
+    # map indicies to station names
+    stationNames = stationData['station_name'].tolist()
+
+    # prepend DC
+    stationNames.insert(0, 'DC')
+
+    #pickle stations names
+    pickle.dump(stationNames, open("station-node-mapping.p", "wb"))
+
     
     # Remove zero values from demand list.
     j = 0 
@@ -74,6 +89,7 @@ def create_model():
 def print_solution(data, manager, routing, assignment):
     """Prints assignment on console."""
     print('made it')
+    stationNames = pickle.load(open("station-node-mapping.p", "rb"))
     total_distance = 0
     total_load = 0
     for vehicle_id in range(data['num_vehicles']):
@@ -84,7 +100,7 @@ def print_solution(data, manager, routing, assignment):
         while not routing.IsEnd(index):
             node_index = manager.IndexToNode(index)
             route_load += data['demands'][node_index]
-            plan_output += ' {0} Load({1}) -> '.format(node_index, route_load)
+            plan_output += ' {0} Load({1}) -> '.format(stationNames[node_index], route_load)
             previous_index = index
             index = assignment.Value(routing.NextVar(index))
             route_distance += routing.GetArcCostForVehicle(
