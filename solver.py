@@ -13,17 +13,16 @@ def create_model():
     averageDelta = pd.read_pickle('data/averageDelta.pkl')
     ## Add the DC to the average deltas.
     listOfDemands = averageDelta[0].tolist()
-    listOfDemands.insert(0, 0)
 
     # Make all the demands into integers
     listOfDemands = [round(x) for x in listOfDemands]
     # Change all negative values in list of demands to zero.
-    listOfDemands = [0 if i < 0 else i for i in listOfDemands]
+    listOfDemands = [0 if i > 0 else i for i in listOfDemands]
 
     # Find all the zero demands (because we won't want to visit these nodes), and drop them from the demand list.
     # Save the indices of these dropped nodes and drop them from the distance matrix also.
 
-    demandIndicesToDrop = [i for i in range(1, len(listOfDemands)) if listOfDemands[i] == 0]
+    demandIndicesToDrop = [i for i in range(len(listOfDemands)) if listOfDemands[i] == 0]
     # print(demandIndicesToDrop)
     
     distances.drop(distances.index[demandIndicesToDrop], inplace=True)
@@ -42,17 +41,15 @@ def create_model():
     pickle.dump(stationNames, open("station-node-mapping.p", "wb"))
 
     
-    # Remove zero values from demand list.
-    j = 0 
-    length = len(listOfDemands)
-    while(j < length):
-        if(listOfDemands[j] == 0 and j != 0):
-            listOfDemands.remove(listOfDemands[j])
-            length = length - 1
-            continue
-        j = j+1
+    # Remove zero values from demand list
+    listOfDemands = list(filter(lambda a: a != 0, listOfDemands))
 
-    listOfDemands.sort(key=lambda v: v != 0)
+    # Add DC to list of demands
+    listOfDemands.insert(0, 0)
+
+    # flip negative values
+    listOfDemands = [abs(value) for value in listOfDemands]
+
     # Create the array of arrays for the distances.
     distanceList = distances.values.tolist()
 
@@ -69,7 +66,7 @@ def create_model():
         randomDemands.append(random.randint(3, 10))
 
     # Hardcode the vehicle capacity for the moment.
-    vehicleCapacity = 25
+    vehicleCapacity = 35
     # Find the total demand that will have to be distributed.
     totalDemand = sum(listOfDemands) # sum(randomDemands)
     # Create the vehicle capacities array...
@@ -92,6 +89,7 @@ def print_solution(data, manager, routing, assignment):
     stationNames = pickle.load(open("station-node-mapping.p", "rb"))
     total_distance = 0
     total_load = 0
+    all_nodes_visited = []
     for vehicle_id in range(data['num_vehicles']):
         index = routing.Start(vehicle_id)
         plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
@@ -99,6 +97,7 @@ def print_solution(data, manager, routing, assignment):
         route_load = 0
         while not routing.IsEnd(index):
             node_index = manager.IndexToNode(index)
+            all_nodes_visited.append(stationNames[node_index])
             route_load += data['demands'][node_index]
             plan_output += ' {0} Load({1}) -> '.format(stationNames[node_index], route_load)
             previous_index = index
@@ -107,6 +106,7 @@ def print_solution(data, manager, routing, assignment):
                 previous_index, index, vehicle_id)
         plan_output += ' {0} Load({1})\n'.format(
             manager.IndexToNode(index), route_load)
+        all_nodes_visited.append(stationNames[0])
         plan_output += 'Distance of the route: {}m\n'.format(route_distance)
         plan_output += 'Load of the route: {}\n'.format(route_load)
         print(plan_output)
@@ -114,6 +114,7 @@ def print_solution(data, manager, routing, assignment):
         total_load += route_load
     print('Total distance of all routes: {}m'.format(total_distance))
     print('Total load of all routes: {}'.format(total_load))
+    pickle.dump(all_nodes_visited, open("data/all-stations-visited-inorder.p", "wb"))
 
 
 def main():
@@ -162,7 +163,7 @@ def main():
     # Setting first solution heuristic.
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     search_parameters.first_solution_strategy = (
-        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+        routing_enums_pb2.FirstSolutionStrategy.GLOBAL_CHEAPEST_ARC)
 
     # Solve the problem.
     assignment = routing.SolveWithParameters(search_parameters)
